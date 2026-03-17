@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EcoSort - Phân Loại Rác Thải AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+  <div class="particles" id="particles"></div>
+
+  <div class="app">
+    <!-- Header -->
+    <header class="header fade-in">
+      <div class="logo">
+        <i class="fa-solid fa-recycle logo-icon"></i>
+        <span class="logo-text">EcoSort</span>
+      </div>
+      <p class="tagline">Hệ thống phân loại rác thải thông minh</p>
+    </header>
+
+    <!-- Main card -->
+    <main class="card fade-in delay-1">
+
+      <!-- Upload zone -->
+      <div class="upload-zone" id="dropZone">
+        <input type="file" id="fileInput" accept="image/*" hidden>
+        <div class="upload-content">
+          <div class="upload-icon-wrap">
+            <i class="fa-solid fa-cloud-arrow-up upload-fa-icon"></i>
+          </div>
+          <h3>Kéo thả ảnh vào đây</h3>
+          <p>hoặc <span class="upload-link">chọn từ máy</span></p>
+          <span class="upload-formats">JPG, PNG, WEBP &middot; Tối đa 10MB</span>
+        </div>
+      </div>
+
+      <!-- Preview -->
+      <div class="preview" id="previewSection" style="display:none">
+        <div class="preview-wrapper">
+          <img id="previewImg" src="" alt="Xem trước">
+          <button class="preview-close" id="btnRemove" title="Xóa ảnh">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <button class="btn-classify" id="btnPredict">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <span>Phân Loại Ngay</span>
+        </button>
+      </div>
+
+      <!-- Loading -->
+      <div class="loader" id="loading" style="display:none">
+        <div class="loader-ring"></div>
+        <p>Đang phân tích ảnh...</p>
+      </div>
+
+      <!-- Result -->
+      <div class="result" id="resultCard" style="display:none">
+        <div class="result-badge" id="resultBadge">
+          <i id="resultIcon" class="fa-solid"></i>
+        </div>
+        <h2 class="result-class" id="resultLabel"></h2>
+        <div class="result-vi" id="resultVi"></div>
+
+        <div class="meter">
+          <div class="meter-label">Độ tin cậy</div>
+          <div class="meter-row">
+            <div class="meter-track">
+              <div class="meter-fill" id="meterFill"></div>
+            </div>
+            <span class="meter-value" id="meterValue"></span>
+          </div>
+        </div>
+
+        <div class="info-row" id="recycleBadge"></div>
+        <div class="info-tip" id="resultTip"></div>
+
+        <div class="divider"></div>
+        <h4 class="prob-heading"><i class="fa-solid fa-chart-bar"></i> Xác suất từng loại</h4>
+        <div class="prob-list" id="probChart"></div>
+
+        <button class="btn-retry" id="btnRetry">
+          <i class="fa-solid fa-rotate-right"></i>
+          Thử ảnh khác
+        </button>
+      </div>
+
+    </main>
+
+    <footer class="footer fade-in delay-2">
+      <i class="fa-solid fa-microchip"></i> MobileNetV2 &middot; TensorFlow
+    </footer>
+  </div>
+
+  <script src="/static/js/main.js"></script>
+</body>
+</html>
