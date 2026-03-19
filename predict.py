@@ -35,9 +35,12 @@ CLASS_INFO = {
 
 # ── Load TFLite model ─────────────────────────────────────
 try:
-    from tflite_runtime.interpreter import Interpreter
+    from ai_edge_litert.interpreter import Interpreter
 except ImportError:
-    from tensorflow.lite import Interpreter
+    try:
+        from tflite_runtime.interpreter import Interpreter
+    except ImportError:
+        from tensorflow.lite import Interpreter
 
 interpreter = Interpreter(model_path=MODEL_PATH)
 interpreter.allocate_tensors()
