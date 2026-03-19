@@ -3,4 +3,4 @@ tflite-runtime
 numpy
 Pillow
 werkzeug
-
+gunicorn
