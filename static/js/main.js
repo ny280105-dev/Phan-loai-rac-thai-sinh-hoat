@@ -111,7 +111,23 @@ async function uploadAndPredict() {
 
   try {
     const res = await fetch('/predict', { method: 'POST', body: fd });
-    const data = await res.json();
+    const bodyText = await res.text();
+    let data = null;
+    if (bodyText) {
+      try { data = JSON.parse(bodyText); } catch (_) { data = null; }
+    }
+
+    if (!res.ok) {
+      const msg = (data && data.error) ? data.error : (bodyText || `HTTP ${res.status}`);
+      alert(msg);
+      return;
+    }
+
+    if (!data) {
+      alert('Server returned invalid response!');
+      return;
+    }
+
     if (data.error) { alert(data.error); return; }
     showResult(data);
   } catch (err) {

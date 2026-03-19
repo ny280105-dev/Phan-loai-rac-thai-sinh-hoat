@@ -1,8 +1,6 @@
 flask
-tensorflow-cpu
+tflite-runtime
 numpy
 Pillow
-matplotlib
-scikit-learn
 werkzeug
-gunicorn
+

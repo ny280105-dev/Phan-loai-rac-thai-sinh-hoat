@@ -1,0 +1,12 @@
+venv/
+__pycache__/
+*.pyc
+data/
+dataset/
+static/uploads/
+*.h5
+model/training_history.png
+model/__pycache__/
+.python-version
+venv
+/model/waste_model.h5

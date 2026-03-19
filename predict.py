@@ -1,29 +1,22 @@
 """
 Logic dự đoán phân loại rác thải
+Sử dụng TFLite runtime (nhẹ) thay vì TensorFlow đầy đủ.
 Label mapping được load từ model/label_map.json (sinh ra khi train)
-để đảm bảo thứ tự class luôn đúng.
 """
 import os
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'  # Ẩn logs cảnh báo
 import json
 import numpy as np
 from PIL import Image
-import tensorflow as tf
-import gc
-
-# Giới hạn bộ nhớ nếu có thể (cho CPU)
-tf.config.set_visible_devices([], 'GPU')
 
 # ── Paths ──────────────────────────────────────────────────
-BASE_DIR    = os.path.dirname(__file__)
-MODEL_PATH  = os.path.join(BASE_DIR, 'model', 'waste_model.h5')
+BASE_DIR       = os.path.dirname(__file__)
+MODEL_PATH     = os.path.join(BASE_DIR, 'model', 'waste_model.tflite')
 LABEL_MAP_PATH = os.path.join(BASE_DIR, 'model', 'label_map.json')
-IMG_SIZE    = 224
+IMG_SIZE       = 224
 
 # ── Load label mapping từ file (sinh ra lúc train) ─────────
 with open(LABEL_MAP_PATH, 'r', encoding='utf-8') as f:
     _label_map = json.load(f)
-# label_map: {"0": "battery", "1": "biological", ...}
 CLASS_NAMES = [_label_map[str(i)] for i in range(len(_label_map))]
 
 # ── Thông tin chi tiết 10 classes ──────────────────────────
@@ -40,21 +33,34 @@ CLASS_INFO = {
     'trash':      {'vi': 'Rác hỗn hợp',            'color': '#DC143C', 'recycle': False, 'tip': 'Bỏ vào thùng rác thường'},
 }
 
-# ── Load model ─────────────────────────────────────────────
-model = tf.keras.models.load_model(MODEL_PATH)
-print(f"✅ Model loaded — {len(CLASS_NAMES)} classes: {CLASS_NAMES}")
+# ── Load TFLite model ─────────────────────────────────────
+try:
+    from tflite_runtime.interpreter import Interpreter
+except ImportError:
+    from tensorflow.lite import Interpreter
+
+interpreter = Interpreter(model_path=MODEL_PATH)
+interpreter.allocate_tensors()
+
+_input_details  = interpreter.get_input_details()
+_output_details = interpreter.get_output_details()
+print(f"✅ TFLite model loaded — {len(CLASS_NAMES)} classes: {CLASS_NAMES}", flush=True)
 
 
 def preprocess_image(img_path):
     img = Image.open(img_path).convert('RGB')
     img = img.resize((IMG_SIZE, IMG_SIZE))
-    arr = np.array(img) / 255.0
+    arr = np.array(img, dtype=np.float32) / 255.0
     return np.expand_dims(arr, axis=0)
 
 
 def predict(img_path):
-    img_array  = preprocess_image(img_path)
-    preds      = model.predict(img_array, verbose=0)[0]
+    img_array = preprocess_image(img_path)
+
+    interpreter.set_tensor(_input_details[0]['index'], img_array)
+    interpreter.invoke()
+    preds = interpreter.get_tensor(_output_details[0]['index'])[0]
+
     idx        = int(np.argmax(preds))
     label      = CLASS_NAMES[idx]
     confidence = float(preds[idx]) * 100
@@ -63,10 +69,6 @@ def predict(img_path):
         CLASS_NAMES[i]: round(float(preds[i]) * 100, 2)
         for i in range(len(CLASS_NAMES))
     }
-    
-    # Giải phóng bộ nhớ tạm thời
-    del img_array
-    gc.collect()
 
     return {
         'predicted_class':  label,
