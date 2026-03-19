@@ -1,6 +1,6 @@
 flask
-tflite-runtime
-numpy
+ai-edge-litert
+numpy<2
 Pillow
 werkzeug
 gunicorn
