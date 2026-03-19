@@ -4,10 +4,15 @@ Label mapping được load từ model/label_map.json (sinh ra khi train)
 để đảm bảo thứ tự class luôn đúng.
 """
 import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'  # Ẩn logs cảnh báo
 import json
 import numpy as np
 from PIL import Image
 import tensorflow as tf
+import gc
+
+# Giới hạn bộ nhớ nếu có thể (cho CPU)
+tf.config.set_visible_devices([], 'GPU')
 
 # ── Paths ──────────────────────────────────────────────────
 BASE_DIR    = os.path.dirname(__file__)
@@ -58,6 +63,10 @@ def predict(img_path):
         CLASS_NAMES[i]: round(float(preds[i]) * 100, 2)
         for i in range(len(CLASS_NAMES))
     }
+    
+    # Giải phóng bộ nhớ tạm thời
+    del img_array
+    gc.collect()
 
     return {
         'predicted_class':  label,

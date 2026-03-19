@@ -26,22 +26,32 @@ def index():
 
 @app.route('/predict', methods=['POST'])
 def upload_predict():
+    print(">>> Nhận request /predict")
     if 'file' not in request.files:
+        print(">>> Lỗi: Không có file")
         return jsonify({'error': 'Không có file'}), 400
 
     file = request.files['file']
     if file.filename == '' or not allowed_file(file.filename):
+        print(f">>> Lỗi: File không hợp lệ: {file.filename}")
         return jsonify({'error': 'File không hợp lệ. Chấp nhận: JPG, PNG, WEBP'}), 400
 
     ext = file.filename.rsplit('.', 1)[1].lower()
     filename = f"{uuid.uuid4().hex}.{ext}"
     filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    
+    print(f">>> Lưu file: {filepath}")
     file.save(filepath)
 
-    result = predict(filepath)
-    result['image_url'] = f"/static/uploads/{filename}"
-
-    return jsonify(result)
+    print(">>> Đang bắt đầu predict...")
+    try:
+        result = predict(filepath)
+        print(">>> Predict thành công!")
+        result['image_url'] = f"/static/uploads/{filename}"
+        return jsonify(result)
+    except Exception as e:
+        print(f">>> LỖI KHI PREDICT: {str(e)}")
+        return jsonify({'error': f"Lỗi xử lý AI: {str(e)}"}), 500
 
 
 @app.route('/api/predict', methods=['POST'])
